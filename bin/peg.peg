@@ -10,8 +10,8 @@ int _escape(int c) {
     case 114:
       return 13;      
     case 116:
-      return 9;      
-  }    
+      return 9;
+  }
   return c;
 }
 
@@ -102,8 +102,12 @@ LEFTARROW <-
   '<-' SPACING
 
 LITERAL <-
-  '\'' (!'\'' CHAR { $$ = $2; })* '\'' SPACING { $$ = new LiteralExpression(new String.fromCharCodes($2)); }
-  / '"' (!'"' CHAR { $$ = $2; })* '"' SPACING { $$ = new LiteralExpression(new String.fromCharCodes($2)); }
+  '\'' (!'\'' CHAR { $$ = $2; })* '\''"i"? SPACING {
+      $$ = new LiteralExpression(new String.fromCharCodes($2))..setIgnoreCase($4.toString() == 'i');
+    }
+  / '"' (!'"' CHAR { $$ = $2; })* '"'"i"? SPACING {
+      $$ = new LiteralExpression(new String.fromCharCodes($2))..setIgnoreCase($4.toString() == 'i');
+    }
 
 MEMBERS <-
   '{' ACTION_BODY* '}' SPACING { $$ = $2.join(); }

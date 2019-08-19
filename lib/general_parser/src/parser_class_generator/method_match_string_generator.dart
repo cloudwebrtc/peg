@@ -18,14 +18,22 @@ class MethodMatchStringGenerator extends DeclarationGenerator {
   static const String _TEMPLATE = "TEMPLATE";
 
   static final String _template = '''
-String $NAME(List<int> codePoints, String string) {
-  var length = codePoints.length;  
+String $NAME(List<int> codePoints, String string, [bool ignoreCase = false]) {
+  var length = codePoints.length;
   $_SUCCESS = $_CURSOR + length <= $_INPUT_LEN;
   if ($_SUCCESS) {
     for (var i = 0; i < length; i++) {
-      if (codePoints[i] != $_INPUT[$_CURSOR + i]) {
-        $_SUCCESS = false;
-        break;
+      if(ignoreCase){
+        if (String.fromCharCode(codePoints[i]).toLowerCase()
+            != String.fromCharCode($_INPUT[$_CURSOR + i]).toLowerCase()) {
+          $_SUCCESS = false;
+          break;
+        }
+      }else{
+        if (codePoints[i] != $_INPUT[$_CURSOR + i]) {
+          $_SUCCESS = false;
+          break;
+        }
       }
     }
   } else {

@@ -1,5 +1,4 @@
 part of peg.general_parser.expressions_generators;
-
 class LiteralExpressionGenerator extends ExpressionGenerator {
   static const String _CH = ParserClassGenerator.CH;
 
@@ -33,7 +32,7 @@ $_RESULT = \'\';
 
   static final String _templateString = '''
 {{#COMMENT_IN}}
-$_RESULT = $_MATCH_STRING({{CODE_POINTS}}, '{{STRING}}');
+$_RESULT = $_MATCH_STRING({{CODE_POINTS}}, '{{STRING}}', {{IGNORE_CASE}});
 {{#COMMENT_OUT}}''';
 
   static final String _templateCharacter = '''
@@ -92,7 +91,9 @@ $_RESULT = $_MATCH_CHAR({{CODE_POINT}}, '{{STRING}}');
   List<String> _generateString() {
     var block = getTemplateBlock(_TEMPLATE_STRING);
     var literal = [];
+    var ignoreCase = _expression.ignoreCase;
     var text = _expression.text;
+
     if (options.comment) {
       block.assign('#COMMENT_IN', '// => $_expression');
       block.assign('#COMMENT_OUT', '// <= $_expression');
@@ -105,6 +106,7 @@ $_RESULT = $_MATCH_CHAR({{CODE_POINT}}, '{{STRING}}');
     var strings = productionRuleGenerator.parserClassGenerator.addString(text);
     block.assign('CODE_POINTS', strings);
     block.assign('STRING', literal.join());
+    block.assign('IGNORE_CASE', ignoreCase? 'true' : 'false');
     return block.process();
   }
 }

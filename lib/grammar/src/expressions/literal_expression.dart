@@ -5,6 +5,8 @@ class LiteralExpression extends Expression {
 
   final String quote;
 
+  bool ignoreCase = false;
+
   LiteralExpression(this.text, [this.quote = '\'']) : super() {
     if (text == null) {
       throw new ArgumentError('text: $text');
@@ -14,6 +16,8 @@ class LiteralExpression extends Expression {
       throw new ArgumentError('quote: $quote');
     }
   }
+
+  void setIgnoreCase(bool enabled) => this.ignoreCase = enabled;
 
   int get maxTimes => 1;
 
