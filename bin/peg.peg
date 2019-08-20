@@ -15,7 +15,7 @@ int _escape(int c) {
   return c;
 }
 
-Expression _prefix(dynamic prefix, Expression expression, String action) {  
+Expression _prefix(dynamic prefix, Expression expression, String action) {
   switch (prefix) {
     case '&':
      expression = new AndPredicateExpression(expression);
@@ -153,6 +153,8 @@ GLOBALS_BODY <-
 
 HEX_NUMBER <-
   [\\] 'u' [0-9A-Fa-f]+ { $$ = int.parse($3.join(), radix: 16); }
+  /
+  [\\] 'x' [0-9A-Fa-f]+ { $$ = int.parse($3.join(), radix: 16); }
 
 IDENT_CONT <-
   IDENT_START

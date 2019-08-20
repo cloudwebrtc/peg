@@ -10,14 +10,14 @@ int _escape(int c) {
     case 110:
       return 10;      
     case 114:
-      return 13;      
+      return 13;
     case 116:
       return 9;
   }
   return c;
 }
 
-Expression _prefix(dynamic prefix, Expression expression, String action) {  
+Expression _prefix(dynamic prefix, Expression expression, String action) {
   switch (prefix) {
     case '&':
      expression = new AndPredicateExpression(expression);
@@ -1416,53 +1416,104 @@ class PegParser {
     var $$;
     switch (_ch == 92 ? 0 : _ch == -1 ? 2 : 1) {
       case 0:
-        var ch0 = _ch, pos0 = _cursor, startPos0 = _startPos;
-        _startPos = _cursor;
-        while (true) {  
-          $$ = _matchChar(92, '\\');
-          if (!success) break;
-          var seq = new List(3)..[0] = $$;
-          $$ = _matchChar(117, 'u');
-          if (!success) break;
-          seq[1] = $$;
-          var testing0;
-          for (var first = true, reps; ;) {  
-            $$ = _matchMapping(48, 102, _mapping2);  
-            if (success) {
-             if (first) {      
-                first = false;
-                reps = [$$];
-                testing0 = _testing;                  
+        while (true) {
+          var ch0 = _ch, pos0 = _cursor, startPos0 = _startPos;
+          _startPos = _cursor;
+          while (true) {  
+            $$ = _matchChar(92, '\\');
+            if (!success) break;
+            var seq = new List(3)..[0] = $$;
+            $$ = _matchChar(117, 'u');
+            if (!success) break;
+            seq[1] = $$;
+            var testing0;
+            for (var first = true, reps; ;) {  
+              $$ = _matchMapping(48, 102, _mapping2);  
+              if (success) {
+               if (first) {      
+                  first = false;
+                  reps = [$$];
+                  testing0 = _testing;                  
+                } else {
+                  reps.add($$);
+                }
+                _testing = _cursor;   
               } else {
-                reps.add($$);
-              }
-              _testing = _cursor;   
-            } else {
-              success = !first;
-              if (success) {      
-                _testing = testing0;
-                $$ = reps;      
-              } else $$ = null;
-              break;
-            }  
+                success = !first;
+                if (success) {      
+                  _testing = testing0;
+                  $$ = reps;      
+                } else $$ = null;
+                break;
+              }  
+            }
+            if (!success) break;
+            seq[2] = $$;
+            $$ = seq;
+            if (success) {    
+              final $1 = seq[0];
+              final $2 = seq[1];
+              final $3 = seq[2];
+              final $start = startPos0;
+              $$ = int.parse($3.join(), radix: 16);
+            }
+            break;
           }
-          if (!success) break;
-          seq[2] = $$;
-          $$ = seq;
-          if (success) {    
-            final $1 = seq[0];
-            final $2 = seq[1];
-            final $3 = seq[2];
-            final $start = startPos0;
-            $$ = int.parse($3.join(), radix: 16);
+          if (!success) {
+            _ch = ch0;
+            _cursor = pos0;
           }
+          _startPos = startPos0;
+          if (success) break;
+          var ch1 = _ch, pos1 = _cursor, startPos1 = _startPos;
+          _startPos = _cursor;
+          while (true) {  
+            $$ = _matchChar(92, '\\');
+            if (!success) break;
+            var seq = new List(3)..[0] = $$;
+            $$ = _matchChar(120, 'x');
+            if (!success) break;
+            seq[1] = $$;
+            var testing1;
+            for (var first = true, reps; ;) {  
+              $$ = _matchMapping(48, 102, _mapping2);  
+              if (success) {
+               if (first) {      
+                  first = false;
+                  reps = [$$];
+                  testing1 = _testing;                  
+                } else {
+                  reps.add($$);
+                }
+                _testing = _cursor;   
+              } else {
+                success = !first;
+                if (success) {      
+                  _testing = testing1;
+                  $$ = reps;      
+                } else $$ = null;
+                break;
+              }  
+            }
+            if (!success) break;
+            seq[2] = $$;
+            $$ = seq;
+            if (success) {    
+              final $1 = seq[0];
+              final $2 = seq[1];
+              final $3 = seq[2];
+              final $start = startPos1;
+              $$ = int.parse($3.join(), radix: 16);
+            }
+            break;
+          }
+          if (!success) {
+            _ch = ch1;
+            _cursor = pos1;
+          }
+          _startPos = startPos1;
           break;
         }
-        if (!success) {
-          _ch = ch0;
-          _cursor = pos0;
-        }
-        _startPos = startPos0;
         break;
       case 1:
       case 2:
@@ -3065,39 +3116,60 @@ class PegParser {
     errors.sort((a, b) => a.position.compareTo(b.position));
     return errors;  
   }
-  
+
   dynamic parse_Grammar() {
+    // SENTENCE (NONTERMINAL)
+    // Grammar <- LEADING_SPACES? GLOBALS? MEMBERS? Definition+ EOF
     var $$;
-    switch (_getState(_transitions0)) {
+    // => LEADING_SPACES? GLOBALS? MEMBERS? Definition+ EOF # Choice
+    switch (_ch >= 0 && _ch <= 1114111 ? 0 : _ch == -1 ? 2 : 1) {
+      // [\u0000-\u0010ffff]
+      // EOF
       case 0:
       case 2:
+        // => LEADING_SPACES? GLOBALS? MEMBERS? Definition+ EOF # Sequence
         var ch0 = _ch, pos0 = _cursor, startPos0 = _startPos;
         _startPos = _cursor;
         while (true) {  
+          // => LEADING_SPACES?
           var testing0 = _testing;
           _testing = _cursor;
+          // => LEADING_SPACES
           $$ = _parse_LEADING_SPACES();
+          // <= LEADING_SPACES
           success = true; 
           _testing = testing0;
+          // <= LEADING_SPACES?
           if (!success) break;
           var seq = new List(5)..[0] = $$;
+          // => GLOBALS?
           var testing1 = _testing;
           _testing = _cursor;
+          // => GLOBALS
           $$ = _parse_GLOBALS();
+          // <= GLOBALS
           success = true; 
           _testing = testing1;
+          // <= GLOBALS?
           if (!success) break;
           seq[1] = $$;
+          // => MEMBERS?
           var testing2 = _testing;
           _testing = _cursor;
+          // => MEMBERS
           $$ = _parse_MEMBERS();
+          // <= MEMBERS
           success = true; 
           _testing = testing2;
+          // <= MEMBERS?
           if (!success) break;
           seq[2] = $$;
+          // => Definition+
           var testing3;
           for (var first = true, reps; ;) {  
+            // => Definition  
             $$ = _parse_Definition();  
+            // <= Definition  
             if (success) {
              if (first) {      
                 first = false;
@@ -3116,17 +3188,25 @@ class PegParser {
               break;
             }  
           }
+          // <= Definition+
           if (!success) break;
           seq[3] = $$;
+          // => EOF
           $$ = _parse_EOF();
+          // <= EOF
           if (!success) break;
           seq[4] = $$;
           $$ = seq;
           if (success) {    
+            // LEADING_SPACES?
             final $1 = seq[0];
+            // GLOBALS?
             final $2 = seq[1];
+            // MEMBERS?
             final $3 = seq[2];
+            // Definition+
             final $4 = seq[3];
+            // EOF
             final $5 = seq[4];
             final $start = startPos0;
             $$ = new Grammar($4, $2, $3);
@@ -3138,18 +3218,22 @@ class PegParser {
           _cursor = pos0;
         }
         _startPos = startPos0;
+        // <= LEADING_SPACES? GLOBALS? MEMBERS? Definition+ EOF # Sequence
         break;
+      // No matches
       case 1:
         $$ = null;
         success = false;
         break;
     }
     if (!success && _cursor > _testing) {
+      // Expected: IDENTIFIER
       _failure(_expect0);
     }
+    // <= LEADING_SPACES? GLOBALS? MEMBERS? Definition+ EOF # Choice
     return $$;
   }
-  
+
   void reset(int pos) {
     if (pos == null) {
       throw new ArgumentError('pos: $pos');
