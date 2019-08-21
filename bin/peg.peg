@@ -15,7 +15,7 @@ int _escape(int c) {
   return c;
 }
 
-Expression _prefix(dynamic prefix, Expression expression, String action) {
+Expression _prefix(dynamic prefix, Expression expression, String action, String label) {
   switch (prefix) {
     case '&':
      expression = new AndPredicateExpression(expression);
@@ -25,6 +25,14 @@ Expression _prefix(dynamic prefix, Expression expression, String action) {
      break;        
   }
   expression.action = action;
+  if(label != null){
+    expression.label = label;
+    /*
+    print('label => ' + label.toString());
+    print('expression => ' + expression.toString());
+    print('action => ' + action.toString());
+    */
+  }
   return expression;
 }
 
@@ -42,6 +50,125 @@ Expression _suffix(String suffix, Expression expression) {
 
 }%
 
+{
+  dynamic parse_Grammar2() {
+    // SENTENCE (NONTERMINAL)
+    // Grammar <- LEADING_SPACES? GLOBALS? MEMBERS? Definition+ EOF
+    var $$;
+    // => LEADING_SPACES? GLOBALS? MEMBERS? Definition+ EOF # Choice
+    switch (_ch >= 0 && _ch <= 1114111 ? 0 : _ch == -1 ? 2 : 1) {
+      // [\u0000-\u0010ffff]
+      // EOF
+      case 0:
+      case 2:
+        // => LEADING_SPACES? GLOBALS? MEMBERS? Definition+ EOF # Sequence
+        var ch0 = _ch, pos0 = _cursor, startPos0 = _startPos;
+        _startPos = _cursor;
+        while (true) {  
+          // => LEADING_SPACES?
+          var testing0 = _testing;
+          _testing = _cursor;
+          // => LEADING_SPACES
+          $$ = _parse_LEADING_SPACES();
+          // <= LEADING_SPACES
+          success = true; 
+          _testing = testing0;
+          // <= LEADING_SPACES?
+          if (!success) break;
+          var seq = new List(5)..[0] = $$;
+          // => GLOBALS?
+          var testing1 = _testing;
+          _testing = _cursor;
+          // => GLOBALS
+          $$ = _parse_GLOBALS();
+          // <= GLOBALS
+          success = true; 
+          _testing = testing1;
+          // <= GLOBALS?
+          if (!success) break;
+          seq[1] = $$;
+          // => MEMBERS?
+          var testing2 = _testing;
+          _testing = _cursor;
+          // => MEMBERS
+          $$ = _parse_MEMBERS();
+          // <= MEMBERS
+          success = true; 
+          _testing = testing2;
+          // <= MEMBERS?
+          if (!success) break;
+          seq[2] = $$;
+          // => Definition+
+          var testing3;
+          for (var first = true, reps; ;) {  
+            // => Definition  
+            $$ = _parse_Definition();  
+            // <= Definition  
+            if (success) {
+             if (first) {      
+                first = false;
+                reps = [$$];
+                testing3 = _testing;                  
+              } else {
+                reps.add($$);
+              }
+              _testing = _cursor;   
+            } else {
+              success = !first;
+              if (success) {      
+                _testing = testing3;
+                $$ = reps;      
+              } else $$ = null;
+              break;
+            }  
+          }
+          // <= Definition+
+          if (!success) break;
+          seq[3] = $$;
+          // => EOF
+          $$ = _parse_EOF();
+          // <= EOF
+          if (!success) break;
+          seq[4] = $$;
+          $$ = seq;
+          if (success) {    
+            // LEADING_SPACES?
+            final $1 = seq[0];
+            // GLOBALS?
+            final $2 = seq[1];
+            // MEMBERS?
+            final $3 = seq[2];
+            // Definition+
+            final $4 = seq[3];
+            // EOF
+            final $5 = seq[4];
+            final $start = startPos0;
+            $$ = new Grammar($4, $2, $3);
+          }
+          break;
+        }
+        if (!success) {
+          _ch = ch0;
+          _cursor = pos0;
+        }
+        _startPos = startPos0;
+        // <= LEADING_SPACES? GLOBALS? MEMBERS? Definition+ EOF # Sequence
+        break;
+      // No matches
+      case 1:
+        $$ = null;
+        success = false;
+        break;
+    }
+    if (!success && _cursor > _testing) {
+      // Expected: IDENTIFIER
+      _failure(_expect0);
+    }
+    // <= LEADING_SPACES? GLOBALS? MEMBERS? Definition+ EOF # Choice
+    return $$;
+  }
+}
+
 ### Sentences (nonterminals) ###
 
 Grammar <-
@@ -57,7 +184,7 @@ Sequence <-
   Prefix+ { $$ = new SequenceExpression($1); }
 
 Prefix <-
-  (AND / NOT)? Suffix ACTION? { $$ = _prefix($1, $2, $3); }
+  LABEL? (AND / NOT)? Suffix ACTION? { $$ = _prefix($2, $3, $4, $1); }
 
 Suffix <-
   Primary (QUESTION / STAR / PLUS)? { $$ = _suffix($2, $1); }
@@ -109,8 +236,19 @@ LITERAL <-
       $$ = new LiteralExpression(new String.fromCharCodes($2))..setIgnoreCase($4.toString() == 'i');
     }
 
+LABEL <-
+  ( ALPHA ( ALPHA / DIGIT / "_")* )':' SPACING {
+      $$ = _text().replaceAll(': ', '');
+    }
+
 MEMBERS <-
   '{' ACTION_BODY* '}' SPACING { $$ = $2.join(); }
+
+DIGIT   <-
+  [0-9]
+
+ALPHA   <-
+  [a-zA-Z]
 
 NOT <-
   '!' SPACING { $$ = $1; }

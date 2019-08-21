@@ -96,7 +96,7 @@ class Program {
   }
 
   Grammar _parseGrammar(PegParser parser) {
-    var grammar = parser.parse_Grammar();
+    var grammar = parser.parse_Grammar2();
     if (!parser.success) {
       var messages = [];
       for (var error in parser.errors()) {

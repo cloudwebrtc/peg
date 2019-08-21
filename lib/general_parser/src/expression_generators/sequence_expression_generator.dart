@@ -26,7 +26,12 @@ class SequenceExpressionGenerator extends ListExpressionGenerator {
   static final String _templateAction = '''
 if ($_SUCCESS) {    
   {{#VARIABLES}}
+  {{#LABEL}}
+  {{#CODE_START}}
+  ///CODE_START
   {{#CODE}}
+  ///CODE_END
+  {{#CODE_END}}
 }''';
 
   static final String _templateFirst = '''
@@ -98,13 +103,77 @@ $_START_POS = {{START_POS}};
     }
   }
 
+  Map<String, int> _lables = new Map<String, int>();
+  _getLables(expression, position){
+    if(expression.label != null){
+      _lables[expression.label] = position + 1;
+    }
+
+    if(expression is LiteralExpression ||
+           expression is CharacterClassExpression ||
+           expression is ZeroOrMoreExpression ||
+           expression is RuleExpression ||
+           expression is NotPredicateExpression ||
+           expression is AnyCharacterExpression ||
+           expression is OneOrMoreExpression)
+           return;
+
+    var expressions = [];
+    if(expression is OptionalExpression){
+      expressions = expression.expressions;
+    }
+    else{
+      expressions = expression.expressions;
+    }
+    var length = expressions.length;
+    if(length > 0){
+        for (var i = 0; i < length; i++) {
+          var exp = expressions[i];
+          if(exp is LiteralExpression ||
+           exp is CharacterClassExpression ||
+           exp is ZeroOrMoreExpression ||
+           exp is OneOrMoreExpression)
+            continue;
+          _getLables(exp, position);
+        }
+    }
+  }
+
   List<String> _generateAction(Expression expression, startPos) {
     var action = expression.action;
+    var position = expression.positionInSequence;
+    _getLables(expression, position);
     if (action != null) {
       var variables = _generateSemanticValues(expression, startPos);
       var block = getTemplateBlock(_TEMPLATE_ACTION);
-      block.assign('#CODE', Utils.codeToStrings(action));
+      var code = Utils.codeToStrings(action);
+      var code_params = '';
+      var call_params = '';
+      if(_lables.length > 0){
+       _lables.forEach((key,value){
+         code_params += ', ' + key;
+         call_params += ', '+ '\$' + value.toString();
+       });
+      }
+      bool addCodeLabel = (code_params != '' && call_params != '');
+      var label = 'var pos0 = _startPos';
+      if(!addCodeLabel) {
+        label += ', offset = \$start';
+        addCodeLabel = code[0].startsWith('return'); 
+      }
+      label += ';';
+
+      block.assign('#CODE', code);
       block.assign('#VARIABLES', variables);
+      block.assign('#LABEL', label);
+
+      if(addCodeLabel){
+        block.assign('#CODE_START', '\$\$ = ((offset' + code_params + ') {');
+        block.assign('#CODE_END', '})(\$start' + call_params +');');
+      }else{
+        block.assign('#CODE_START', '{');
+        block.assign('#CODE_END', '}');
+      }
       return block.process();
     }
 

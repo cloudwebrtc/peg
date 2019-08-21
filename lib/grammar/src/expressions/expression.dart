@@ -19,6 +19,8 @@ abstract class Expression {
 
   String action;
 
+  String label;
+
   Set<Expression> allAbleNotConsumeInputExpressions = new Set<Expression>();
 
   Set<Expression> allLeftExpressions = new Set<Expression>();

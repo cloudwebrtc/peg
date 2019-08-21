@@ -5,6 +5,16 @@ class OptionalExpression extends SuffixExpression {
 
   int get minTimes => 0;
 
+
+  get expressions => _getExpressions();
+
+  _getExpressions() {
+    if(_expression is OrderedChoiceExpression){
+      return _expression.expressions;
+    }
+    return [];
+  }
+
   String get suffix {
     return '?';
   }
