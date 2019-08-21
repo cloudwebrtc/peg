@@ -86,7 +86,7 @@ class GrammarAnalyzer {
     if (unresolvedRules.isEmpty && !temp.isEmpty) {
       var rule = temp.first;
       if (!rule.isMorpheme) {
-        warnings.add('Warning: Most used rule is not a morpheme": ${rule.name}');
+        warnings.add('Warning: Most used rule is not a morpheme: "${rule.name}"');
       }
     }
 

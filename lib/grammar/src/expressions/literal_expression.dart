@@ -5,8 +5,6 @@ class LiteralExpression extends Expression {
 
   final String quote;
 
-  bool ignoreCase = false;
-
   LiteralExpression(this.text, [this.quote = '\'']) : super() {
     if (text == null) {
       throw new ArgumentError('text: $text');

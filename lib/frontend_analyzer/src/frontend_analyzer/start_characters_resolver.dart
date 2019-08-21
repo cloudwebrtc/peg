@@ -28,11 +28,14 @@ class StartCharactersResolver extends ExpressionResolver {
   Object visitLiteral(LiteralExpression expression) {
     if (expression.level == 0) {
       var text = expression.text;
+      var ignoreCase = expression.ignoreCase;
       if (text.isEmpty) {
         expression.startCharacters.addGroup(Expression.unicodeGroup);
       } else {
         var codePoint = toRune(text);
-        var group = new GroupedRangeList<bool>(codePoint, codePoint, true);
+        var group = new GroupedRangeList<bool>(codePoint, codePoint, true)
+        ..setText(text)
+        ..setIgnoreCase(ignoreCase);
         expression.startCharacters.addGroup(group);
       }
     }

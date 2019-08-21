@@ -21,6 +21,8 @@ abstract class Expression {
 
   String label;
 
+  bool ignoreCase;
+
   Set<Expression> allAbleNotConsumeInputExpressions = new Set<Expression>();
 
   Set<Expression> allLeftExpressions = new Set<Expression>();

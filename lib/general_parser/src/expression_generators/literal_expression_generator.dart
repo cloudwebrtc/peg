@@ -91,7 +91,7 @@ $_RESULT = $_MATCH_CHAR({{CODE_POINT}}, '{{STRING}}');
   List<String> _generateString() {
     var block = getTemplateBlock(_TEMPLATE_STRING);
     var literal = [];
-    var ignoreCase = _expression.ignoreCase;
+    var ignoreCase = _expression.ignoreCase?? false;
     var text = _expression.text;
 
     if (options.comment) {

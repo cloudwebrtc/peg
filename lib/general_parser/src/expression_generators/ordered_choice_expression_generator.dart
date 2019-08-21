@@ -178,8 +178,14 @@ switch ({{STATE}}) {
   List<String> _generateStates() {
     var blockSwitch = getTemplateBlock(_TEMPLATE_SWITCH);
     var transitions = new SparseList<List<Expression>>();
+    bool ignoreCase = false;
+    var text = '';
     for (var expression in _expression.expressions) {
       for (var range in expression.startCharacters.groups) {
+        if(!ignoreCase) {
+          ignoreCase = range.ignoreCase?? false;
+          text = range.text;
+        }
         for (var group in transitions.getAllSpace(range)) {
           var key = group.key;
           if (key == null) {
@@ -229,9 +235,15 @@ switch ({{STATE}}) {
         }
       }
     }
-
     if (singleCharacter != null) {
-      var state = "$_CH == $singleCharacter ? 0 : $_CH == -1 ? $eofState : $failState";
+      var state = '';
+      if(ignoreCase) {
+       int lowerCase = new String.fromCharCodes([singleCharacter]).toLowerCase().codeUnitAt(0);
+       int upperCase = new String.fromCharCodes([singleCharacter]).toUpperCase().codeUnitAt(0);
+        state = "($_CH == $lowerCase || $_CH == $upperCase ) ? 0 : $_CH == -1 ? $eofState : $failState";
+      }else{
+        state = "$_CH == $singleCharacter ? 0 : $_CH == -1 ? $eofState : $failState";
+      }
       blockSwitch.assign("STATE", state);
     } else if (singleRange != null) {
       var start = singleRange.start;
@@ -239,7 +251,28 @@ switch ({{STATE}}) {
       var state = "$_CH >= $start && $_CH <= $end ? 0 : $_CH == -1 ? $eofState : $failState";
       blockSwitch.assign("STATE", state);
     } else {
-      var variableName = parserClassGenerator.addTransition(ranges);
+      var variableName;
+      if(ignoreCase) {
+        var ranges2 = <List<RangeList>>[];
+        ranges.forEach((list){
+          List<RangeList> new_list = [];
+          list.forEach((item){
+            if(item.start == item.end){
+              int charCode = item.start;
+              int lowerCase = new String.fromCharCodes([charCode]).toLowerCase().codeUnitAt(0);
+              int upperCase = new String.fromCharCodes([charCode]).toUpperCase().codeUnitAt(0);
+              new_list.add(new RangeList((lowerCase > upperCase? upperCase : lowerCase), (lowerCase > upperCase? lowerCase : upperCase)));
+            }else{
+              new_list.add(item);
+            }
+          });
+          ranges2.add(new_list);
+        });
+        variableName = parserClassGenerator.addTransition(ranges2);
+      }else{
+        variableName = parserClassGenerator.addTransition(ranges);
+      }
+
       var state = "$_GET_STATE($variableName)";
       blockSwitch.assign("STATE", state);
     }
