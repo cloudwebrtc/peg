@@ -246,7 +246,7 @@ switch ({{STATE}}) {
       }
       blockSwitch.assign("STATE", state);
     } else if (singleRange != null) {
-      var start = singleRange.start;
+      var start = 0;
       var end = singleRange.end;
       var state = "$_CH >= $start && $_CH <= $end ? 0 : $_CH == -1 ? $eofState : $failState";
       blockSwitch.assign("STATE", state);
