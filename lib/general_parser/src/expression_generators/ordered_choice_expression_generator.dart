@@ -183,8 +183,11 @@ switch ({{STATE}}) {
     for (var expression in _expression.expressions) {
       for (var range in expression.startCharacters.groups) {
         if(!ignoreCase) {
-          ignoreCase = range.ignoreCase?? false;
-          text = range.text;
+          var ts = textlists[range];
+          if (ts != null) {
+            ignoreCase = ts.ignoreCase ?? false;
+            text = ts.text;
+          }
         }
         for (var group in transitions.getAllSpace(range)) {
           var key = group.key;

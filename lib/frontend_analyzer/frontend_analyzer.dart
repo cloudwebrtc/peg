@@ -1,6 +1,7 @@
 library peg.frontend_analyzer.frontend_analyzer;
 
 import 'package:lists/lists.dart';
+import "package:peg/utils/utils.dart";
 import 'package:peg/grammar/expression_visitors.dart';
 import 'package:peg/grammar/expressions.dart';
 import 'package:peg/grammar/grammar.dart';
