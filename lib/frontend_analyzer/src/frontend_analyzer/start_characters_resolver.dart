@@ -34,7 +34,6 @@ class StartCharactersResolver extends ExpressionResolver {
       } else {
         var codePoint = toRune(text);
         var group = new GroupedRangeList<bool>(codePoint, codePoint, true);
-        textlists[group] = new TextSaver(text, ignoreCase);
         expression.startCharacters.addGroup(group);
       }
     }

@@ -81,7 +81,9 @@ switch ({{STATE}}) {
 
   OrderedChoiceExpression _expression;
 
-  OrderedChoiceExpressionGenerator(Expression expression, ProductionRuleGenerator productionRuleGenerator) : super(expression, productionRuleGenerator) {
+  OrderedChoiceExpressionGenerator(
+      Expression expression, ProductionRuleGenerator productionRuleGenerator)
+      : super(expression, productionRuleGenerator) {
     if (expression is! OrderedChoiceExpression) {
       throw new StateError('Expression must be OrderedChoiceExpression');
     }
@@ -127,13 +129,15 @@ switch ({{STATE}}) {
     if (hasNull) {
       block.assign('EXPECTED', 'const [null]');
     } else {
-      block.assign('EXPECTED', productionRuleGenerator.parserClassGenerator.addExpected(expected));
+      block.assign('EXPECTED',
+          productionRuleGenerator.parserClassGenerator.addExpected(expected));
     }
 
     if (options.comment) {
       block.assign('#COMMENT_IN', '// => $_expression # Choice');
       block.assign('#COMMENT_OUT', '// <= $_expression # Choice');
-      block.assign('#COMMENT_EXPECTED', '// Expected: ${printableExpected.join(", ")}');
+      block.assign(
+          '#COMMENT_EXPECTED', '// Expected: ${printableExpected.join(", ")}');
     }
 
     var states = _generateStates();
@@ -145,7 +149,8 @@ switch ({{STATE}}) {
     var length = expressions.length;
     if (length == 1) {
       var block = getTemplateBlock(_TEMPLATE_SINGLE);
-      var generator = createGenerator(expressions.first, productionRuleGenerator);
+      var generator =
+          createGenerator(expressions.first, productionRuleGenerator);
       block.assign("#EXPRESSION", generator.generate());
       return block.process();
     }
@@ -179,16 +184,24 @@ switch ({{STATE}}) {
     var blockSwitch = getTemplateBlock(_TEMPLATE_SWITCH);
     var transitions = new SparseList<List<Expression>>();
     bool ignoreCase = false;
-    var text = '';
+    bool wildcardMatching = false;
     for (var expression in _expression.expressions) {
       for (var range in expression.startCharacters.groups) {
-        if(!ignoreCase) {
-          var ts = textlists[range];
-          if (ts != null) {
-            ignoreCase = ts.ignoreCase ?? false;
-            text = ts.text;
+        expression.expressions.forEach((Expression element) {
+          if (element is RuleExpression) {
+            RuleExpression exp = element;
+            OrderedChoiceExpression oder = exp.rule.expression;
+            if (oder.expressions.isNotEmpty) {
+              wildcardMatching = true;
+            }
+          } else if (element is LiteralExpression) {
+            LiteralExpression exp = element;
+            if (!ignoreCase) {
+              ignoreCase = exp.ignoreCase ?? false;
+            }
           }
-        }
+        });
+
         for (var group in transitions.getAllSpace(range)) {
           var key = group.key;
           if (key == null) {
@@ -199,7 +212,8 @@ switch ({{STATE}}) {
             key.add(expression);
           }
 
-          transitions.addGroup(new GroupedRangeList(group.start, group.end, key));
+          transitions
+              .addGroup(new GroupedRangeList(group.start, group.end, key));
         }
       }
     }
@@ -221,6 +235,7 @@ switch ({{STATE}}) {
       } else {
         ranges[state].add(group);
       }
+      //print('ignoreCase: key $key, value => ${group.toString()}');
     }
 
     final int eofState = states.length + 1;
@@ -240,39 +255,57 @@ switch ({{STATE}}) {
     }
     if (singleCharacter != null) {
       var state = '';
-      if(ignoreCase) {
-       int lowerCase = new String.fromCharCodes([singleCharacter]).toLowerCase().codeUnitAt(0);
-       int upperCase = new String.fromCharCodes([singleCharacter]).toUpperCase().codeUnitAt(0);
-        state = "($_CH == $lowerCase || $_CH == $upperCase ) ? 0 : $_CH == -1 ? $eofState : $failState";
-      }else{
-        state = "$_CH == $singleCharacter ? 0 : $_CH == -1 ? $eofState : $failState";
+      if (ignoreCase) {
+        int lowerCase = new String.fromCharCodes([singleCharacter])
+            .toLowerCase()
+            .codeUnitAt(0);
+        int upperCase = new String.fromCharCodes([singleCharacter])
+            .toUpperCase()
+            .codeUnitAt(0);
+        state =
+            "($_CH == $lowerCase || $_CH == $upperCase ) ? 0 : $_CH == -1 ? $eofState : $failState";
+      } else {
+        if (wildcardMatching) {
+          state =
+              "_ch >= 0 && _ch <= 1114111 ? 0 : $_CH == -1 ? $eofState : $failState";
+        } else {
+          state =
+              "$_CH == $singleCharacter ? 0 : $_CH == -1 ? $eofState : $failState";
+        }
       }
       blockSwitch.assign("STATE", state);
     } else if (singleRange != null) {
       var start = 0;
       var end = singleRange.end;
-      var state = "$_CH >= $start && $_CH <= $end ? 0 : $_CH == -1 ? $eofState : $failState";
+      var state =
+          "$_CH >= $start && $_CH <= $end ? 0 : $_CH == -1 ? $eofState : $failState";
       blockSwitch.assign("STATE", state);
     } else {
       var variableName;
-      if(ignoreCase) {
+      if (ignoreCase) {
         var ranges2 = <List<RangeList>>[];
-        ranges.forEach((list){
+        ranges.forEach((list) {
           List<RangeList> new_list = [];
-          list.forEach((item){
-            if(item.start == item.end){
+          list.forEach((item) {
+            if (item.start == item.end) {
               int charCode = item.start;
-              int lowerCase = new String.fromCharCodes([charCode]).toLowerCase().codeUnitAt(0);
-              int upperCase = new String.fromCharCodes([charCode]).toUpperCase().codeUnitAt(0);
-              new_list.add(new RangeList((lowerCase > upperCase? upperCase : lowerCase), (lowerCase > upperCase? lowerCase : upperCase)));
-            }else{
+              int lowerCase = new String.fromCharCodes([charCode])
+                  .toLowerCase()
+                  .codeUnitAt(0);
+              int upperCase = new String.fromCharCodes([charCode])
+                  .toUpperCase()
+                  .codeUnitAt(0);
+              new_list.add(new RangeList(
+                  (lowerCase > upperCase ? upperCase : lowerCase),
+                  (lowerCase > upperCase ? lowerCase : upperCase)));
+            } else {
               new_list.add(item);
             }
           });
           ranges2.add(new_list);
         });
         variableName = parserClassGenerator.addTransition(ranges2);
-      }else{
+      } else {
         variableName = parserClassGenerator.addTransition(ranges);
       }
 
